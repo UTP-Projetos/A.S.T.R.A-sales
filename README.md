@@ -1,4 +1,4 @@
-# 🏢 CRM Caverá Country Park
+# 🏢 T.I.N.A CRM
 
 Sistema de gestão de clientes e vendas para o Caverá Country Park, desenvolvido com Next.js 15, TypeScript e Supabase.
 
