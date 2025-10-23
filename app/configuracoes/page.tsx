@@ -1,218 +1,288 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { createBrowserClient } from "@supabase/ssr";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { MainLayout } from "@/components/main-layout";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { PhoneInput } from "@/components/ui/phone-input";
-import { Loader2, Save, LogOut, Key, Building2, LinkIcon } from "lucide-react";
-import type { Company } from "@/types/database";
-
-const schema = z.object({
-  name: z.string().min(3, "Nome deve ter no mínimo 3 caracteres").max(100),
-  email: z.string().email("E-mail inválido").optional().or(z.literal("")),
-  whatsapp: z
-    .string()
-    .regex(/^[0-9]{10,13}$/, "WhatsApp deve ter entre 10 e 13 dígitos (Ex: 5548999999999)")
-    .optional()
-    .or(z.literal("")),
-});
-
-type FormData = z.infer<typeof schema>;
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useTheme } from "next-themes";
+import { 
+  Moon, 
+  Sun, 
+  Monitor, 
+  User, 
+  Bell, 
+  Shield, 
+  Save,
+  Check
+} from "lucide-react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 export default function ConfiguracoesPage() {
-  const router = useRouter();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-  const queryClient = useQueryClient();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-  const { data: company, isLoading } = useQuery({
-    queryKey: ["company"],
-    queryFn: async () => {
-      const { data: userRes } = await supabase.auth.getUser();
-      const user = userRes.user;
-      if (!user?.email) throw new Error("Sessão inválida");
-      const { data, error } = await supabase
-        .from("Company")
-        .select("*")
-        .eq("email", user.email)
-        .single();
-      if (error) throw error;
-      return data as Company;
-    },
-  });
-
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
-    resolver: zodResolver(schema),
-  });
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (company) {
-      setValue("name", company.name || "");
-      setValue("email", company.email || "");
-      setValue("whatsapp", company.WppPhone || "");
-    }
-  }, [company, setValue]);
+    setMounted(true);
+  }, []);
 
-  const updateMutation = useMutation({
-    mutationFn: async (data: FormData) => {
-      if (!company) throw new Error("Empresa não encontrada");
-      const { error } = await supabase
-        .from("Company")
-        .update({
-          name: data.name,
-          email: data.email || null,
-          WppPhone: data.whatsapp || null,
-        })
-        .eq("id", company.id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["company"] });
-      toast.success("Configurações salvas com sucesso!");
-    },
-    onError: (err: any) => {
-      toast.error("Erro ao salvar", { description: err?.message || "Tente novamente" });
+  // Buscar dados do usuário
+  const { data: user } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
     },
   });
 
-  const onSubmit = (data: FormData) => updateMutation.mutate(data);
+  // Buscar dados da empresa
+  const { data: company } = useQuery({
+    queryKey: ["company", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("Company")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    try {
-      await supabase.auth.signOut();
-      router.push("/login");
-      router.refresh();
-    } finally {
-      setIsLoggingOut(false);
-    }
+  const handleSavePreferences = async () => {
+    setSaving(true);
+    // Simular salvamento (implementar depois)
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    toast.success("Preferências salvas com sucesso!");
+    setSaving(false);
   };
-
-  if (isLoading) {
-    return (
-      <MainLayout>
-        <div className="flex items-center justify-center h-full">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </MainLayout>
-    );
-  }
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="flex-1 space-y-6 p-8">
+        {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold">Configurações</h1>
-          <p className="text-muted-foreground">Gerencie os dados da sua empresa</p>
+          <h1 className="text-3xl font-bold tracking-tight">Configurações</h1>
+          <p className="text-muted-foreground">
+            Gerencie as preferências da sua conta e sistema
+          </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" /> Dados da Empresa
-              </CardTitle>
-              <CardDescription>Informações básicas</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="name" className="text-sm font-medium leading-none">Nome da Empresa *</label>
-                  <Input id="name" placeholder="Ex: Hotel Caverá" {...register("name")} />
-                  {errors.name && (
-                    <p className="text-sm text-red-500">{errors.name.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium leading-none">E-mail</label>
-                  <Input id="email" type="email" placeholder="contato@empresa.com" {...register("email")} />
-                  {errors.email && (
-                    <p className="text-sm text-red-500">{errors.email.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="whatsapp" className="text-sm font-medium leading-none">WhatsApp (Opcional)</label>
-                  <PhoneInput id="whatsapp" placeholder="55 48 99999-9999" defaultValue={company?.WppPhone || ""} onChange={(value) => setValue("whatsapp", value)} />
-                  {errors.whatsapp && (
-                    <p className="text-sm text-red-500">{errors.whatsapp.message}</p>
-                  )}
-                </div>
-
-                <Button type="submit" className="w-full" disabled={updateMutation.isPending}>
-                  {updateMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" /> Salvar Alterações
-                    </>
+        {/* Aparência */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Monitor className="h-5 w-5" />
+              Aparência
+            </CardTitle>
+            <CardDescription>
+              Personalize como o sistema aparece para você
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>Tema</Label>
+              <div className="grid grid-cols-3 gap-4">
+                <Button
+                  variant={theme === "light" ? "default" : "outline"}
+                  className="justify-start"
+                  onClick={() => setTheme("light")}
+                  disabled={!mounted}
+                >
+                  <Sun className="mr-2 h-4 w-4" />
+                  Claro
+                  {mounted && theme === "light" && (
+                    <Check className="ml-auto h-4 w-4" />
                   )}
                 </Button>
-              </form>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <LinkIcon className="h-5 w-5" /> Conexão WhatsApp
-              </CardTitle>
-              <CardDescription>Informações de integração</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Token da Instância</p>
-                <Input value={company?.tokenInstance || "—"} readOnly />
-                <p className="text-xs text-muted-foreground">Configuração feita pelo suporte (Evolution Manager)</p>
+                <Button
+                  variant={theme === "dark" ? "default" : "outline"}
+                  className="justify-start"
+                  onClick={() => setTheme("dark")}
+                  disabled={!mounted}
+                >
+                  <Moon className="mr-2 h-4 w-4" />
+                  Escuro
+                  {mounted && theme === "dark" && (
+                    <Check className="ml-auto h-4 w-4" />
+                  )}
+                </Button>
+                <Button
+                  variant={theme === "system" ? "default" : "outline"}
+                  className="justify-start"
+                  onClick={() => setTheme("system")}
+                  disabled={!mounted}
+                >
+                  <Monitor className="mr-2 h-4 w-4" />
+                  Sistema
+                  {mounted && theme === "system" && (
+                    <Check className="ml-auto h-4 w-4" />
+                  )}
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+              <p className="text-sm text-muted-foreground">
+                {mounted && theme === "system" 
+                  ? "Seguindo as preferências do sistema operacional" 
+                  : mounted && theme === "dark"
+                  ? "Tema escuro ativo"
+                  : "Tema claro ativo"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Key className="h-5 w-5" /> Segurança
-              </CardTitle>
-              <CardDescription>Gerencie sua sessão</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full" disabled>
-                <Key className="mr-2 h-4 w-4" /> Alterar Senha
+        {/* Perfil */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Perfil
+            </CardTitle>
+            <CardDescription>
+              Informações da sua conta
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={user?.email || ""}
+                disabled
+                className="bg-muted"
+              />
+              <p className="text-sm text-muted-foreground">
+                Email não pode ser alterado
+              </p>
+            </div>
+            {company && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="company">Empresa</Label>
+                  <Input
+                    id="company"
+                    value={company.fantasyName || ""}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="whatsapp">WhatsApp</Label>
+                  <Input
+                    id="whatsapp"
+                    value={company.WppPhone || "Não configurado"}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Notificações */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Notificações
+            </CardTitle>
+            <CardDescription>
+              Configure como você deseja ser notificado
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Novas mensagens</Label>
+                <p className="text-sm text-muted-foreground">
+                  Receber notificação quando um cliente enviar mensagem
+                </p>
+              </div>
+              <Button variant="outline" size="sm">
+                Em breve
               </Button>
-              <Button variant="destructive" className="w-full" onClick={handleLogout} disabled={isLoggingOut}>
-                {isLoggingOut ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saindo...
-                  </>
-                ) : (
-                  <>
-                    <LogOut className="mr-2 h-4 w-4" /> Sair da Conta
-                  </>
-                )}
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Novos agendamentos</Label>
+                <p className="text-sm text-muted-foreground">
+                  Ser notificado quando houver um novo agendamento
+                </p>
+              </div>
+              <Button variant="outline" size="sm">
+                Em breve
               </Button>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Status da A.S.T.R.A</Label>
+                <p className="text-sm text-muted-foreground">
+                  Alertas sobre problemas com a agente de IA
+                </p>
+              </div>
+              <Button variant="outline" size="sm">
+                Em breve
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Segurança */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Segurança
+            </CardTitle>
+            <CardDescription>
+              Mantenha sua conta segura
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Alterar senha</Label>
+                <p className="text-sm text-muted-foreground">
+                  Trocar a senha da sua conta
+                </p>
+              </div>
+              <Button variant="outline" size="sm">
+                Em breve
+              </Button>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Sessões ativas</Label>
+                <p className="text-sm text-muted-foreground">
+                  Ver dispositivos conectados à sua conta
+                </p>
+              </div>
+              <Button variant="outline" size="sm">
+                Em breve
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Botão de salvar */}
+        <div className="flex justify-end">
+          <Button onClick={handleSavePreferences} disabled={saving}>
+            {saving ? (
+              <>Salvando...</>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Salvar preferências
+              </>
+            )}
+          </Button>
         </div>
       </div>
     </MainLayout>

@@ -53,7 +53,7 @@ export function RecentClients() {
             {clients.map((client) => (
               <div
                 key={client.id}
-                className="flex items-center justify-between border-b pb-4 last:border-0"
+                className="flex items-center justify-between border-b border-border pb-4 last:border-0"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">

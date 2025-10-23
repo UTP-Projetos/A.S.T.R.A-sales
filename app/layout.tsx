@@ -7,8 +7,8 @@ import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "CRM Caverá Country Park",
-  description: "Sistema de gestão de clientes e vendas do Caverá Country Park",
+  title: "A.S.T.R.A CRM",
+  description: "Sistema de gestão de clientes com Agente de IA para WhatsApp",
 };
 
 export default function RootLayout({
@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers>{children}</Providers>
         <Toaster position="top-right" richColors />

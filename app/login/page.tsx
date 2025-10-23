@@ -94,7 +94,7 @@ function LoginForm() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">
-            CRM Caverá
+            A.S.T.R.A CRM
           </CardTitle>
           <CardDescription>
             Entre com suas credenciais para acessar o painel
@@ -198,7 +198,7 @@ function LoginForm() {
           {/* Informações adicionais */}
           <div className="mt-6 pt-6 border-t text-center space-y-2">
             <p className="text-xs text-muted-foreground">
-              Sistema de CRM com Agente de IA Amanda
+              Sistema de CRM com Agente de IA A.S.T.R.A
             </p>
             <p className="text-xs text-muted-foreground">
               Automatize seu atendimento via WhatsApp

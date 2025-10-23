@@ -1,6 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { MainLayout } from "@/components/main-layout";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,8 @@ import {
   Building2,
   AlertCircle,
   Loader2,
-  CalendarDays
+  CalendarDays,
+  Bot
 } from "lucide-react";
 import { 
   formatDateTime, 
@@ -32,11 +34,14 @@ import {
 import { type Client, type Schedule } from "@/types/database";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { ChatViewer } from "@/components/chat/chat-viewer";
 
 export default function ClientDetailsPage() {
   const params = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const clientId = params.id as string;
+  const [botToggleError, setBotToggleError] = useState<string | null>(null);
 
   // Buscar dados do cliente
   const { data: client, isLoading: isLoadingClient, isError: isErrorClient, error: errorClient } = useQuery({
@@ -52,6 +57,39 @@ export default function ClientDetailsPage() {
       return data as Client;
     },
   });
+
+  // Mutation para toggle do bot
+  const toggleBotMutation = useMutation({
+    mutationFn: async (activeBot: boolean) => {
+      const response = await fetch(`/api/clients/${clientId}/toggle-bot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activeBot })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erro ao alterar status do bot');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ["client", clientId] });
+      queryClient.invalidateQueries({ queryKey: ["clients"] });
+      setBotToggleError(null);
+    },
+    onError: (error) => {
+      setBotToggleError(error instanceof Error ? error.message : 'Erro ao alterar status do bot');
+    }
+  });
+
+  const handleToggleBot = () => {
+    if (client) {
+      toggleBotMutation.mutate(!client.activeBot);
+    }
+  };
 
   // Buscar agendamentos relacionados
   // IMPORTANTE: Agendamentos são vinculados pelo telefone (wppPhone), não pelo ID
@@ -139,6 +177,23 @@ export default function ClientDetailsPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button 
+              variant={isBotActive ? "destructive" : "default"}
+              onClick={handleToggleBot}
+              disabled={toggleBotMutation.isPending}
+            >
+              {toggleBotMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processando...
+                </>
+              ) : (
+                <>
+                  <Bot className="mr-2 h-4 w-4" />
+                  {isBotActive ? "Desativar Bot" : "Ativar Bot"}
+                </>
+              )}
+            </Button>
             <Button variant="outline">
               <MessageSquare className="mr-2 h-4 w-4" />
               Ver Conversas
@@ -152,6 +207,18 @@ export default function ClientDetailsPage() {
             </Button>
           </div>
         </div>
+
+        {/* Mensagem de erro do toggle do bot */}
+        {botToggleError && (
+          <Card className="border-red-500 bg-red-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 text-red-700">
+                <AlertCircle className="h-4 w-4" />
+                <p className="text-sm font-medium">{botToggleError}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Status Cards */}
         <div className="grid gap-4 md:grid-cols-3">
@@ -350,6 +417,9 @@ export default function ClientDetailsPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Histórico de Conversa com Amanda */}
+        <ChatViewer clientPhone={client.wppPhone} />
       </div>
     </MainLayout>
   );

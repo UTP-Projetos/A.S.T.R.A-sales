@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
+import { createErrorResponse } from "@/lib/api-error";
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,6 +48,11 @@ export async function POST(request: NextRequest) {
     // Gerar nome único para a instância
     const instanceName = `empresa-${company.id}-${Date.now()}`;
     
+    logger.info('Criando instância Evolution', { 
+      instanceName, 
+      companyId: company.id 
+    });
+    
     // Criar nova instância
     const createResponse = await fetch(
       `${evolutionUrl}/instance/create`,
@@ -69,7 +76,10 @@ export async function POST(request: NextRequest) {
 
     if (!createResponse.ok) {
       const errorData = await createResponse.json();
-      console.error("Erro ao criar instância:", errorData);
+      logger.error('Erro ao criar instância na Evolution API', { 
+        status: createResponse.status,
+        error: errorData 
+      });
       
       return NextResponse.json({ 
         error: "Erro ao criar instância",
@@ -78,29 +88,49 @@ export async function POST(request: NextRequest) {
     }
 
     const createData = await createResponse.json();
+    
+    logger.info('Instância criada com sucesso', { 
+      instanceName,
+      hasToken: !!createData.hash?.apikey 
+    });
 
-    // Atualizar empresa com o nome da instância
+    // CORRIGIDO: Salvar tokenInstance e instanceName
+    const tokenInstance = createData.hash?.apikey || createData.instance?.token || createData.token;
+    
+    if (!tokenInstance) {
+      logger.warn('Token não encontrado na resposta da Evolution API', { createData });
+    }
+
     const { error: updateError } = await supabase
       .from("Company")
-      .update({ instanceName: instanceName })
+      .update({ 
+        instanceName: instanceName,
+        tokenInstance: tokenInstance,
+        webhookConfigured: true,
+        onboardingCompleted: false // Ainda precisa conectar WhatsApp
+      })
       .eq("id", company.id);
 
     if (updateError) {
-      console.error("Erro ao atualizar empresa:", updateError);
+      logger.error('Erro ao salvar instância no banco', { error: updateError });
+      return createErrorResponse(updateError, 'Erro ao salvar instância');
     }
+
+    logger.info('Instância salva no banco com sucesso', { 
+      companyId: company.id,
+      instanceName 
+    });
 
     return NextResponse.json({ 
       success: true,
       instanceName: instanceName,
+      tokenInstance: tokenInstance,
       message: "Instância criada com sucesso",
       data: createData
     });
 
   } catch (error) {
-    console.error("Erro ao criar instância:", error);
-    return NextResponse.json(
-      { error: "Erro ao criar instância", details: error instanceof Error ? error.message : String(error) },
-      { status: 500 }
-    );
+    logger.error('Erro ao criar instância', { error });
+    return createErrorResponse(error, 'Erro ao criar instância');
   }
 }

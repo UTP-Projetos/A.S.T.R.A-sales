@@ -149,28 +149,28 @@ export function DashboardStats() {
       value: stats?.totalClients || 0,
       description: `+${stats?.newClients || 0} este mês`,
       icon: Users,
-      color: "text-blue-600",
+      color: "text-blue-600 dark:text-blue-400",
     },
     {
       title: "Agendamentos",
       value: stats?.totalSchedules || 0,
       description: `${stats?.pendingSchedules || 0} pendentes`,
       icon: Calendar,
-      color: "text-green-600",
+      color: "text-green-600 dark:text-green-400",
     },
     {
       title: "Taxa de Conversão",
       value: stats?.conversionRate || "0.0%",
       description: stats?.conversionDiff || "Sem dados do mês anterior",
       icon: TrendingUp,
-      color: "text-purple-600",
+      color: "text-purple-600 dark:text-purple-400",
     },
     {
       title: "Receita Total",
       value: stats?.totalRevenue || "R$ 0",
       description: `${stats?.revenueThisMonth || "R$ 0"} este mês`,
       icon: DollarSign,
-      color: "text-orange-600",
+      color: "text-orange-600 dark:text-orange-400",
     },
   ];
 

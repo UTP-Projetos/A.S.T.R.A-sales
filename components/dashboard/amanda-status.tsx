@@ -32,7 +32,7 @@ export function AmandaStatus() {
     queryFn: async () => {
       const response = await fetch("/api/evolution/check-amanda");
       if (!response.ok) {
-        throw new Error("Erro ao verificar Amanda");
+        throw new Error("Erro ao verificar A.S.T.R.A");
       }
       return response.json();
     },
@@ -45,10 +45,10 @@ export function AmandaStatus() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bot className="h-5 w-5" />
-            Status da Amanda
+            Status da A.S.T.R.A
           </CardTitle>
           <CardDescription>
-            Verificando configuração da sua agente de IA...
+            Assistente de IA para WhatsApp
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -66,16 +66,16 @@ export function AmandaStatus() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Bot className="h-5 w-5" />
-            Status da Amanda
+            Status da A.S.T.R.A
           </CardTitle>
           <CardDescription>
             Erro ao verificar configuração
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2 text-red-500">
+          <div className="flex items-center gap-2 text-red-500 dark:text-red-400">
             <XCircle className="h-5 w-5" />
-            <span>Erro ao verificar Amanda</span>
+            <span>Erro ao verificar A.S.T.R.A</span>
           </div>
         </CardContent>
       </Card>
@@ -86,12 +86,12 @@ export function AmandaStatus() {
 
   const getStatusIcon = () => {
     if (!amanda.configured) {
-      return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+      return <AlertCircle className="h-5 w-5 text-yellow-500 dark:text-yellow-400" />;
     }
     if (amanda.connected) {
-      return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+      return <CheckCircle2 className="h-5 w-5 text-green-500 dark:text-green-400" />;
     }
-    return <XCircle className="h-5 w-5 text-red-500" />;
+    return <XCircle className="h-5 w-5 text-red-500 dark:text-red-400" />;
   };
 
   const getStatusText = () => {
@@ -119,7 +119,7 @@ export function AmandaStatus() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Bot className="h-5 w-5" />
-          Status da Amanda
+          Status da A.S.T.R.A
         </CardTitle>
         <CardDescription>
           Sua agente de IA para atendimento automatizado
@@ -143,9 +143,9 @@ export function AmandaStatus() {
             <span className="text-muted-foreground">Configurada:</span>
             <div className="flex items-center gap-1">
               {amanda.configured ? (
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <CheckCircle2 className="h-4 w-4 text-green-500 dark:text-green-400" />
               ) : (
-                <XCircle className="h-4 w-4 text-red-500" />
+                <XCircle className="h-4 w-4 text-red-500 dark:text-red-400" />
               )}
               <span>{amanda.configured ? "Sim" : "Não"}</span>
             </div>
@@ -155,9 +155,9 @@ export function AmandaStatus() {
             <span className="text-muted-foreground">WhatsApp:</span>
             <div className="flex items-center gap-1">
               {amanda.connected ? (
-                <Wifi className="h-4 w-4 text-green-500" />
+                <Wifi className="h-4 w-4 text-green-500 dark:text-green-400" />
               ) : (
-                <WifiOff className="h-4 w-4 text-red-500" />
+                <WifiOff className="h-4 w-4 text-red-500 dark:text-red-400" />
               )}
               <span>{amanda.connected ? "Conectado" : "Desconectado"}</span>
             </div>
@@ -180,7 +180,7 @@ export function AmandaStatus() {
               className="w-full"
             >
               <Settings className="mr-2 h-4 w-4" />
-              Configurar Amanda
+              Configurar A.S.T.R.A
             </Button>
           ) : !amanda.connected ? (
             <Button 
@@ -192,9 +192,9 @@ export function AmandaStatus() {
               Conectar WhatsApp
             </Button>
           ) : (
-            <div className="text-center text-green-600 text-sm">
+            <div className="text-center text-green-600 dark:text-green-400 text-sm">
               <CheckCircle2 className="h-4 w-4 inline mr-1" />
-              Amanda funcionando perfeitamente!
+              A.S.T.R.A funcionando perfeitamente!
             </div>
           )}
         </div>

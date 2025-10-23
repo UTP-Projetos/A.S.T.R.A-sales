@@ -25,7 +25,10 @@ import {
   formatDateTime, 
   formatPhone,
   getStatusColor,
-  getAppointmentTypeColor 
+  getAppointmentTypeColor,
+  parseAppointmentNotes,
+  formatAppointmentNotes,
+  denormalizePhone
 } from "@/lib/utils";
 import { type Schedule, type Client } from "@/types/database";
 import Link from "next/link";
@@ -103,15 +106,8 @@ export default function ScheduleDetailsPage() {
     );
   }
 
-  // Parse appointmentNotes se for string
-  let appointmentNotes = schedule.appointmentNotes;
-  if (typeof appointmentNotes === 'string') {
-    try {
-      appointmentNotes = JSON.parse(appointmentNotes);
-    } catch (e) {
-      // Se não for JSON válido, mantém como string
-    }
-  }
+  // Parse appointmentNotes usando helper
+  const appointmentNotes = parseAppointmentNotes(schedule.appointmentNotes);
 
   return (
     <MainLayout>

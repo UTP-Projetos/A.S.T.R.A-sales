@@ -12,7 +12,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">
-            Visão geral do CRM Caverá Country Park
+            Visão geral do A.S.T.R.A CRM
           </p>
         </div>
 
