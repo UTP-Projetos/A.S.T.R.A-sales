@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
+import { checkRateLimit, RATE_LIMIT_PRESETS } from "@/lib/rate-limit";
 
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const rateLimit = checkRateLimit(request, RATE_LIMIT_PRESETS.CRITICAL);
+  if (rateLimit.limited) {
+    return rateLimit.response;
+  }
+
   try {
-    console.log("🔍 API ETAPA 1: Iniciando API get-qr");
+    logger.debug("Iniciando API get-qr");
     const cookieStore = await cookies();
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -19,16 +27,16 @@ export async function GET(request: NextRequest) {
     );
     
     // Verificar autenticação (usar getUser() para segurança)
-    console.log("🔍 API ETAPA 2: Verificando autenticação");
+    logger.debug("Verificando autenticação");
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
-      console.log("❌ API ETAPA 2: Erro de autenticação:", authError);
+      logger.error("Erro de autenticação", authError);
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
-    console.log("✅ API ETAPA 2: Usuário autenticado:", user.email);
+    logger.debug("Usuário autenticado", { userEmail: user.email });
 
     // Buscar empresa do usuário
-    console.log("🔍 API ETAPA 3: Buscando empresa do usuário");
+    logger.debug("Buscando empresa do usuário");
     const { data: company, error: companyError } = await supabase
       .from("Company")
       .select("*")
@@ -36,10 +44,10 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (companyError || !company) {
-      console.log("❌ API ETAPA 3: Erro ao buscar empresa:", companyError);
+      logger.error("Erro ao buscar empresa", companyError);
       return NextResponse.json({ error: "Empresa não encontrada" }, { status: 404 });
     }
-    console.log("✅ API ETAPA 3: Empresa encontrada:", company.name);
+    logger.debug("Empresa encontrada", { companyName: company.name, companyId: company.id });
 
     const evolutionUrl = process.env.NEXT_PUBLIC_EVOLUTION_API_URL;
     const apiKey = process.env.EVOLUTION_API_KEY;
@@ -55,15 +63,15 @@ export async function GET(request: NextRequest) {
     
     // Se não tem instância configurada, criar uma nova
     if (!instanceName) {
-      console.log("🔍 API ETAPA 4: Nenhuma instância configurada, criando nova...");
+      logger.debug("Nenhuma instância configurada, criando nova");
       
       // Gerar nome único para a instância
       const newInstanceName = `amanda-${company.id}-${Date.now()}`;
-      console.log("🔍 API ETAPA 4: Nome da instância:", newInstanceName);
+      logger.debug("Nome da instância gerado", { instanceName: newInstanceName });
       
       try {
         // 1. Criar instância na Evolution API
-        console.log("🔍 API ETAPA 5: Criando instância na Evolution API");
+        logger.debug("Criando instância na Evolution API");
         const createResponse = await fetch(
           `${evolutionUrl}/instance/create`,
           {
@@ -77,7 +85,7 @@ export async function GET(request: NextRequest) {
               qrcode: true,
               integration: "WHATSAPP-BAILEYS",
               webhook: {
-                url: `${process.env.N8N_WEBHOOK_BASE_URL}/amanda-webhook`,
+                url: `${process.env.N8N_WEBHOOK_BASE_URL}/astra-sales-webhook`,
                 events: ["MESSAGES_UPSERT", "CONNECTION_UPDATE", "MESSAGES_UPDATE"]
               },
               settings: {
@@ -96,15 +104,14 @@ export async function GET(request: NextRequest) {
 
         if (!createResponse.ok) {
           const errorData = await createResponse.json();
-          console.error("Erro ao criar instância:", errorData);
+          logger.error("Erro ao criar instância na Evolution API", errorData);
           return NextResponse.json({ 
-            error: "Erro ao criar instância na Evolution API",
-            details: errorData 
+            error: "Erro ao criar instância na Evolution API"
           }, { status: createResponse.status });
         }
 
         const createData = await createResponse.json();
-        console.log("Instância criada com sucesso:", createData);
+        logger.debug("Instância criada com sucesso", { instanceName: newInstanceName });
 
         // 2. Atualizar empresa com nome da instância
         const { error: updateError } = await supabase
@@ -113,11 +120,11 @@ export async function GET(request: NextRequest) {
           .eq("id", company.id);
 
         if (updateError) {
-          console.error("Erro ao atualizar empresa:", updateError);
+          logger.error("Erro ao atualizar empresa com nome da instância", updateError);
         }
 
         // 3. Obter QR Code da nova instância
-        console.log("🔍 API ETAPA 7: Obtendo QR Code da nova instância");
+        logger.debug("Obtendo QR Code da nova instância");
         const qrResponse = await fetch(
           `${evolutionUrl}/instance/connect/${newInstanceName}`,
           {
@@ -129,56 +136,48 @@ export async function GET(request: NextRequest) {
           }
         );
 
-        console.log("🔍 API ETAPA 7: QR Response Status:", qrResponse.status);
+        logger.debug("QR Response Status", { status: qrResponse.status });
         if (!qrResponse.ok) {
           const errorData = await qrResponse.json();
-          console.error("❌ API ETAPA 7: Erro ao obter QR Code:", errorData);
+          logger.error("Erro ao obter QR Code da nova instância", errorData);
           return NextResponse.json({ 
-            error: "Erro ao obter QR Code da nova instância",
-            details: errorData 
+            error: "Erro ao obter QR Code da nova instância"
           }, { status: qrResponse.status });
         }
 
         const qrData = await qrResponse.json();
-        console.log("🔍 API ETAPA 8: QR Data recebido:", Object.keys(qrData));
+        logger.debug("QR Data recebido da Evolution API", { dataKeys: Object.keys(qrData) });
         
         const qrCodeBase64 = qrData.base64 || qrData.qrcode?.base64 || qrData.qr?.base64;
-        console.log("🔍 API ETAPA 8: QR Code encontrado:", !!qrCodeBase64);
-        console.log("🔍 API ETAPA 8: QR Code tipo:", typeof qrCodeBase64);
-        console.log("🔍 API ETAPA 8: QR Code tamanho:", qrCodeBase64?.length || 0);
-        console.log("🔍 API ETAPA 8: QR Code primeiros 100 chars:", qrCodeBase64?.substring(0, 100));
+        logger.debug("QR Code processado", { 
+          hasQrCode: !!qrCodeBase64,
+          qrCodeType: typeof qrCodeBase64,
+          qrCodeLength: qrCodeBase64?.length || 0
+        });
 
         if (!qrCodeBase64) {
-          console.log("❌ API ETAPA 8: QR Code não encontrado na resposta");
+          logger.error("QR Code não encontrado na resposta da Evolution API", qrData);
           return NextResponse.json({ 
-            error: "QR Code não foi gerado pela Evolution API",
-            details: "A Evolution API não retornou um QR Code válido",
-            debug: qrData
+            error: "QR Code não foi gerado pela Evolution API"
           }, { status: 500 });
         }
 
-        console.log("✅ API ETAPA 9: Retornando QR Code para frontend");
-        console.log("🔍 API ETAPA 9: QR Code final - tipo:", typeof qrCodeBase64);
-        console.log("🔍 API ETAPA 9: QR Code final - tamanho:", qrCodeBase64.length);
-        console.log("🔍 API ETAPA 9: QR Code final - é data URL:", qrCodeBase64.startsWith('data:'));
+        logger.debug("Retornando QR Code para frontend", { 
+          qrCodeLength: qrCodeBase64.length,
+          isDataUrl: qrCodeBase64.startsWith('data:')
+        });
         
         return NextResponse.json({ 
           qrCode: qrCodeBase64,
           code: qrData.code || qrData.qrcode?.code,
           pairingCode: qrData.pairingCode,
-          instanceName: newInstanceName,
-          debug: {
-            hasQrCode: !!qrCodeBase64,
-            qrCodeLength: qrCodeBase64?.length || 0,
-            endpoint: "create_then_connect"
-          }
+          instanceName: newInstanceName
         });
 
       } catch (error) {
-        console.error("Erro ao criar instância:", error);
+        logger.error("Erro ao criar instância", error);
         return NextResponse.json({ 
-          error: "Erro ao criar instância", 
-          details: error instanceof Error ? error.message : String(error) 
+          error: "Erro ao criar instância"
         }, { status: 500 });
       }
     }
@@ -210,7 +209,7 @@ export async function GET(request: NextRequest) {
         }
       } else if (checkResponse.status === 404) {
         // Instância não existe na Evolution API
-        console.log(`Instância ${instanceName} não existe na Evolution API`);
+        logger.warn("Instância não existe na Evolution API", { instanceName });
         
         // Limpar instância do banco
         await supabase
@@ -230,12 +229,12 @@ export async function GET(request: NextRequest) {
         }, { status: 404 });
       }
     } catch (error) {
-      console.error("Erro ao verificar status da instância:", error);
+      logger.error("Erro ao verificar status da instância", error);
     }
 
     // Se instância existe mas não está conectada, obter QR Code
     try {
-      console.log(`Obtendo QR Code da instância: ${instanceName}`);
+      logger.debug("Obtendo QR Code da instância existente", { instanceName });
       const qrResponse = await fetch(
         `${evolutionUrl}/instance/connect/${instanceName}`,
         {
@@ -249,10 +248,9 @@ export async function GET(request: NextRequest) {
 
       if (!qrResponse.ok) {
         const errorData = await qrResponse.json();
-        console.error("Erro ao obter QR Code:", errorData);
+        logger.error("Erro ao obter QR Code da instância existente", errorData);
         return NextResponse.json({ 
-          error: "Erro ao obter QR Code",
-          details: errorData 
+          error: "Erro ao obter QR Code"
         }, { status: qrResponse.status });
       }
 
@@ -260,37 +258,35 @@ export async function GET(request: NextRequest) {
       const qrCodeBase64 = qrData.base64 || qrData.qrcode?.base64 || qrData.qr?.base64;
 
       if (!qrCodeBase64) {
+        logger.error("QR Code não encontrado na resposta da Evolution API", qrData);
         return NextResponse.json({ 
-          error: "QR Code não foi gerado pela Evolution API",
-          details: "A Evolution API não retornou um QR Code válido",
-          debug: qrData
+          error: "QR Code não foi gerado pela Evolution API"
         }, { status: 500 });
       }
+
+      logger.debug("Retornando QR Code da instância existente", { 
+        qrCodeLength: qrCodeBase64.length,
+        instanceName 
+      });
 
       return NextResponse.json({ 
         qrCode: qrCodeBase64,
         code: qrData.code || qrData.qrcode?.code,
         pairingCode: qrData.pairingCode,
-        instanceName: instanceName,
-        debug: {
-          hasQrCode: !!qrCodeBase64,
-          qrCodeLength: qrCodeBase64?.length || 0,
-          endpoint: "connect_existing"
-        }
+        instanceName: instanceName
       });
 
     } catch (error) {
-      console.error("Erro ao obter QR Code:", error);
+      logger.error("Erro ao obter QR Code da instância existente", error);
       return NextResponse.json({ 
-        error: "Erro ao obter QR Code", 
-        details: error instanceof Error ? error.message : String(error) 
+        error: "Erro ao obter QR Code"
       }, { status: 500 });
     }
 
   } catch (error) {
-    console.error("Erro ao obter QR Code:", error);
+    logger.error("Erro geral ao obter QR Code", error);
     return NextResponse.json(
-      { error: "Erro ao obter QR Code", details: error instanceof Error ? error.message : String(error) },
+      { error: "Erro ao obter QR Code" },
       { status: 500 }
     );
   }

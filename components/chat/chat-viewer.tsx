@@ -58,7 +58,7 @@ export function ChatViewer({ clientPhone }: ChatViewerProps) {
         .select("session_id")
         .limit(100);
       
-      const uniqueSessions = [...new Set(data?.map(d => d.session_id) || [])];
+      const uniqueSessions = [...new Set((data as any)?.map((d: any) => d.session_id) || [])];
       console.log("🗂️ [ChatViewer] Session IDs existentes no banco:", uniqueSessions);
       return uniqueSessions;
     },
@@ -68,9 +68,9 @@ export function ChatViewer({ clientPhone }: ChatViewerProps) {
   // Parse e filtra mensagens
   const messages: ParsedChatMessage[] = rawMessages
     ? filterInternalMessages(
-        rawMessages
-          .map(msg => parseChatMessage(msg.message, msg.id))
-          .filter((msg): msg is ParsedChatMessage => msg !== null)
+        (rawMessages as any)
+          .map((msg: any) => parseChatMessage(msg.message, msg.id))
+          .filter((msg: any): msg is ParsedChatMessage => msg !== null)
       )
     : [];
   

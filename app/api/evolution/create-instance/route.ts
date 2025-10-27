@@ -3,8 +3,15 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { logger } from "@/lib/logger";
 import { createErrorResponse } from "@/lib/api-error";
+import { checkRateLimit, RATE_LIMIT_PRESETS } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimit = checkRateLimit(request, RATE_LIMIT_PRESETS.CRITICAL);
+  if (rateLimit.limited) {
+    return rateLimit.response;
+  }
+
   try {
     const cookieStore = await cookies();
     const supabase = createServerClient(
@@ -67,7 +74,7 @@ export async function POST(request: NextRequest) {
           qrcode: true,
           integration: "WHATSAPP-BAILEYS",
           webhook: {
-            url: `${process.env.N8N_WEBHOOK_BASE_URL}/evolution-webhook`,
+            url: `${process.env.N8N_WEBHOOK_BASE_URL}/astra-sales-webhook`,
             events: ["MESSAGES_UPSERT", "CONNECTION_UPDATE"]
           }
         })

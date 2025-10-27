@@ -5,7 +5,7 @@ const envSchema = z.object({
   // Supabase (obrigatórias)
   NEXT_PUBLIC_SUPABASE_URL: z.string().url('NEXT_PUBLIC_SUPABASE_URL deve ser uma URL válida'),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, 'NEXT_PUBLIC_SUPABASE_ANON_KEY é obrigatória'),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'SUPABASE_SERVICE_ROLE_KEY é obrigatória para webhooks').optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1, 'SUPABASE_SERVICE_ROLE_KEY é obrigatória'),
   
   // Evolution API (obrigatórias)
   NEXT_PUBLIC_EVOLUTION_API_URL: z.string().url('NEXT_PUBLIC_EVOLUTION_API_URL deve ser uma URL válida'),

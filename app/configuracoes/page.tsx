@@ -41,17 +41,17 @@ export default function ConfiguracoesPage() {
 
   // Buscar dados da empresa
   const { data: company } = useQuery({
-    queryKey: ["company", user?.id],
+    queryKey: ["company", user?.email],
     queryFn: async () => {
-      if (!user?.id) return null;
+      if (!user?.email) return null;
       const { data } = await supabase
         .from("Company")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("email", user.email)
         .single();
       return data;
     },
-    enabled: !!user?.id,
+    enabled: !!user?.email,
   });
 
   const handleSavePreferences = async () => {
@@ -167,7 +167,7 @@ export default function ConfiguracoesPage() {
                   <Label htmlFor="company">Empresa</Label>
                   <Input
                     id="company"
-                    value={company.fantasyName || ""}
+                    value={(company as any)?.name || ""}
                     disabled
                     className="bg-muted"
                   />
@@ -176,7 +176,7 @@ export default function ConfiguracoesPage() {
                   <Label htmlFor="whatsapp">WhatsApp</Label>
                   <Input
                     id="whatsapp"
-                    value={company.WppPhone || "Não configurado"}
+                    value={(company as any)?.WppPhone || "Não configurado"}
                     disabled
                     className="bg-muted"
                   />

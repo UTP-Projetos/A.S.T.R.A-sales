@@ -19,7 +19,7 @@ export type Database = {
           cpf: string | null;
           dateOfBirth: string | null;
           adress: string | null;
-          CompanyId: number | null;
+          CompanyId: string | null;
           activeBot: boolean | null;
           conversationId: string | null;
           crmLeadStatus: string | null; // "Novo Contato" | "Contato em Andamento" | "Orçamento Enviado" | "Reserva/Agendamento Confirmado" | "Visita/Atividade Realizada" | "Contato Perdido"
@@ -36,7 +36,7 @@ export type Database = {
           cpf?: string | null;
           dateOfBirth?: string | null;
           adress?: string | null;
-          CompanyId?: number | null;
+          CompanyId?: string | null;
           activeBot?: boolean | null;
           conversationId?: string | null;
           crmLeadStatus?: string | null;
@@ -53,7 +53,7 @@ export type Database = {
           cpf?: string | null;
           dateOfBirth?: string | null;
           adress?: string | null;
-          CompanyId?: number | null;
+          CompanyId?: string | null;
           activeBot?: boolean | null;
           conversationId?: string | null;
           crmLeadStatus?: string | null;
@@ -71,6 +71,7 @@ export type Database = {
           tokenInstance: string | null;
           status: string | null;
           email: string | null;
+          user_id: string | null; // ID do usuário proprietário (pode estar vazio)
           instanceName: string | null;
           whatsappConnected: boolean | null;
           webhookConfigured: boolean | null;
@@ -84,6 +85,7 @@ export type Database = {
           tokenInstance?: string | null;
           status?: string | null;
           email?: string | null;
+          user_id?: string | null;
           instanceName?: string | null;
           whatsappConnected?: boolean | null;
           webhookConfigured?: boolean | null;
@@ -97,6 +99,7 @@ export type Database = {
           tokenInstance?: string | null;
           status?: string | null;
           email?: string | null;
+          user_id?: string | null;
           instanceName?: string | null;
           whatsappConnected?: boolean | null;
           webhookConfigured?: boolean | null;

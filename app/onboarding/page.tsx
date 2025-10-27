@@ -9,7 +9,7 @@ import { Loader2, CheckCircle2, Smartphone, Wifi, Zap, ArrowRight } from "lucide
 import { toast } from "sonner";
 import Image from "next/image";
 
-type OnboardingStep = 1 | 2;
+type OnboardingStep = 1 | 2 | 3;
 
 interface ConnectionStatus {
   connected: boolean;
