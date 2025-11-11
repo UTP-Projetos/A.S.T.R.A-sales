@@ -1,38 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { getUserCompany, getSupabaseClient } from "@/lib/auth-helper";
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return cookieStore.get(name)?.value;
-          },
-        },
-      }
-    );
+    // Buscar empresa (em modo dev, retorna primeira empresa; em produção, busca do usuário autenticado)
+    const company = await getUserCompany(request);
     
-    // Verificar autenticação (usar getUser() para segurança)
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
-    }
-
-    // Buscar empresa do usuário
-    const { data: company, error: companyError } = await supabase
-      .from("Company")
-      .select("*")
-      .eq("email", user.email)
-      .single();
-
-    if (companyError || !company) {
+    if (!company) {
       return NextResponse.json({ error: "Empresa não encontrada" }, { status: 404 });
     }
+
+    const supabase = await getSupabaseClient(request);
 
     // Verificar se já tem Amanda configurada
     if (company.onboardingCompleted && company.tokenInstance) {

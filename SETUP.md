@@ -1,32 +1,15 @@
-# 🚀 SETUP - A.S.T.R.A CRM
+# 🚀 Setup - A.S.T.R.A CRM
 
-Guia rápido para rodar o projeto localmente em **15-30 minutos**.
+Guia passo a passo para configurar o projeto do zero.
 
 ---
 
 ## 📋 Pré-requisitos
 
-Antes de começar, instale:
-
-- ✅ **Node.js 20+** ([Download](https://nodejs.org/))
-- ✅ **npm 10+** (vem com Node.js)
-- ✅ **Git** ([Download](https://git-scm.com/))
-
-### Verificar versões instaladas:
-```bash
-node --version  # Deve ser >= 20.0.0
-npm --version   # Deve ser >= 10.0.0
-```
-
-### Usar nvm (recomendado):
-```bash
-# Instalar nvm (se não tiver)
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
-
-# Usar Node 20
-nvm install 20
-nvm use 20
-```
+- ✅ Node.js 20+ ([Download](https://nodejs.org/))
+- ✅ npm 10+ (vem com Node.js)
+- ✅ Conta no [Supabase](https://supabase.com)
+- ✅ Acesso à Evolution API (WhatsApp)
 
 ---
 
@@ -47,7 +30,7 @@ npm install
 
 ## ⚙️ Passo 2: Configurar Variáveis de Ambiente
 
-### Opção A: Script Automático (Recomendado)
+### Opção A: Script Automático
 ```bash
 npm run setup
 ```
@@ -61,7 +44,7 @@ cp env.example .env.local
 code .env.local  # ou nano .env.local
 ```
 
-### Preencher as variáveis:
+### Preencher as variáveis no `.env.local`:
 
 ```env
 # Supabase (obrigatório)
@@ -75,9 +58,15 @@ EVOLUTION_API_KEY=sua-api-key
 
 # n8n (opcional)
 N8N_WEBHOOK_BASE_URL=https://seu-n8n.com
+
+# Modo Desenvolvimento (OPCIONAL - para trabalhar sem autenticação)
+# ⚠️ Use apenas em desenvolvimento local!
+DISABLE_AUTH=false
 ```
 
-📚 **Onde obter as chaves?** Veja [docs/SERVICOS_EXTERNOS.md](docs/SERVICOS_EXTERNOS.md) (em breve)
+**Onde obter as chaves:**
+- **Supabase**: Settings → API (URL, anon key, service role key)
+- **Evolution API**: Configurações da sua instância
 
 ⏱️ **Tempo:** 5-10 minutos
 
@@ -90,25 +79,38 @@ N8N_WEBHOOK_BASE_URL=https://seu-n8n.com
 3. Vá em **SQL Editor**
 4. Execute os scripts **nesta ordem**:
 
+### **3.1 Criar Tabelas**
 ```sql
--- 1. Criar tabelas (2min)
--- Cole todo o conteúdo de: supabase/create-tables-and-policies.sql
--- Execute tudo de uma vez
-
--- 2. Adicionar campos de instância (30s)
--- Cole todo o conteúdo de: supabase/add-instance-name-field.sql
--- Execute tudo de uma vez
-
--- 3. Adicionar campos de onboarding (30s)
--- Cole todo o conteúdo de: supabase/add-onboarding-fields.sql
--- Execute tudo de uma vez
-
--- 4. Popular com dados de exemplo (30s) - OPCIONAL
--- Cole todo o conteúdo de: supabase/seed.sql
--- Execute tudo de uma vez
+-- Execute: supabase/create-tables-and-policies.sql
+-- Cole todo o conteúdo do arquivo e execute
 ```
 
-📚 **Mais detalhes:** [supabase/README.md](supabase/README.md)
+### **3.2 Adicionar Campos de Instância**
+```sql
+-- Execute: supabase/add-instance-name-field.sql
+```
+
+### **3.3 Adicionar Campos de Onboarding**
+```sql
+-- Execute: supabase/add-onboarding-fields.sql
+```
+
+### **3.4 Dados de Exemplo (Opcional)**
+```sql
+-- Execute: supabase/seed.sql
+-- Adiciona dados de teste para desenvolvimento
+```
+
+### **3.5 Modo Desenvolvimento (Opcional)**
+
+Se você configurou `DISABLE_AUTH=true` no `.env.local`:
+
+```sql
+-- Execute: supabase/disable-rls.sql
+-- Remove políticas de segurança para desenvolvimento
+```
+
+⚠️ **Atenção:** Desabilitar RLS remove todas as proteções. Use apenas em desenvolvimento local!
 
 ⏱️ **Tempo:** 3-5 minutos
 
@@ -128,14 +130,7 @@ npm run dev
 
 ## ✅ Verificar se Está Funcionando
 
-### 1. Build de Produção
-```bash
-npm run build
-```
-
-Deve compilar sem erros ✅
-
-### 2. Health Check
+### 1. Health Check
 Acesse: [http://localhost:3000/api/health](http://localhost:3000/api/health)
 
 Deve retornar:
@@ -150,17 +145,15 @@ Deve retornar:
 }
 ```
 
-### 3. Dashboard
+### 2. Dashboard
 Acesse: [http://localhost:3000](http://localhost:3000)
 
-Deve mostrar:
-- ✅ Página de login
-- ✅ Sem erros no console
-- ✅ Design bonito
+- Se `DISABLE_AUTH=false`: Redireciona para `/login`
+- Se `DISABLE_AUTH=true`: Acessa direto o dashboard
 
 ---
 
-## 🆘 Troubleshooting
+## 🆘 Problemas Comuns
 
 ### Erro: `Missing env vars`
 → Configure o `.env.local` (Passo 2)
@@ -169,56 +162,58 @@ Deve mostrar:
 → Execute os scripts SQL (Passo 3)
 
 ### Erro: `Cannot find module 'react/jsx-dev-runtime'`
-→ Use Node.js 20+ (Passo 1)
+→ Use Node.js 20+ (`node --version`)
 
 ### Erro: `Evolution API unreachable`
-→ Verifique se a URL e API Key estão corretas
+→ Verifique se a URL e API Key estão corretas no `.env.local`
 
 ### Dashboard vazio (sem dados)
 → Execute `supabase/seed.sql` para adicionar dados de exemplo
 
-### Mais problemas?
-Consulte: [ANALISE_ONBOARDING.md](ANALISE_ONBOARDING.md)
+---
+
+## 🛠️ Modo Desenvolvimento
+
+Para trabalhar sem autenticação e bloqueios:
+
+1. **No `.env.local`:**
+```env
+DISABLE_AUTH=true
+```
+
+2. **No Supabase (SQL Editor):**
+```sql
+-- Execute: supabase/disable-rls.sql
+```
+
+3. **Reiniciar servidor:**
+```bash
+npm run dev
+```
+
+📚 **Mais detalhes:** [MODO_DESENVOLVIMENTO.md](MODO_DESENVOLVIMENTO.md)
 
 ---
 
 ## 📚 Próximos Passos
 
-Depois de rodar o projeto:
-
-1. **[ROADMAP_MVP.md](ROADMAP_MVP.md)** - Veja o que está implementado
-2. **[docs/ONBOARDING_DEV.md](docs/ONBOARDING_DEV.md)** - Entenda a arquitetura
-3. **[docs/API.md](docs/API.md)** - Conheça as APIs
+- **[MVP_FALTANTE_SIMPLES.md](MVP_FALTANTE_SIMPLES.md)** - O que falta implementar
+- **[docs/API.md](docs/API.md)** - Documentação da API
+- **[docs/ONBOARDING_DEV.md](docs/ONBOARDING_DEV.md)** - Guia para desenvolvedores
 
 ---
 
 ## 🎯 Comandos Úteis
 
 ```bash
-# Desenvolvimento
-npm run dev                # Rodar em dev mode
-npm run build              # Build de produção
-npm run start              # Rodar build de produção
-npm run lint               # Checar erros de código
-
-# Utilitários
-npm run setup              # Configurar .env.local
-npm run check-env          # Validar variáveis de ambiente
+npm run dev          # Desenvolvimento
+npm run build        # Build de produção
+npm run start        # Rodar build de produção
+npm run setup        # Configurar .env.local
+npm run check-env    # Validar variáveis de ambiente
+npm run lint         # Verificar erros de código
 ```
 
 ---
 
-## 🐳 Alternativa: Docker (Opcional)
-
-Se quiser rodar Evolution API e n8n localmente:
-
-```bash
-# Em breve: docker-compose.yml
-docker-compose up -d
-```
-
----
-
-**✅ Setup completo!** Se levou mais de 30 minutos, abra uma issue para melhorarmos este guia.
-
-**Última Atualização:** 06/11/2025
+**✅ Setup completo!** Se levou mais de 30 minutos, consulte a seção de problemas comuns ou abra uma issue.

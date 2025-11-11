@@ -4,6 +4,15 @@ import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
+  
+  // MODO DESENVOLVIMENTO: Se DISABLE_AUTH=true, permitir acesso sem autenticação
+  const disableAuth = process.env.DISABLE_AUTH === "true";
+  
+  if (disableAuth) {
+    // Em modo desenvolvimento, permitir acesso a todas as rotas sem autenticação
+    return res;
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -29,11 +38,9 @@ export async function middleware(req: NextRequest) {
 
   const { pathname } = req.nextUrl;
 
-  // Verificar sessão do usuário
-
   // Rotas públicas (não requerem autenticação)
   const publicRoutes = ["/login", "/cadastro", "/recuperar-senha", "/termos", "/force-logout", "/clear-session"];
-  const apiRoutes = ["/api/check-env", "/api/test-supabase", "/api/force-logout"]; // APIs que não precisam de autenticação
+  const apiRoutes = ["/api/check-env", "/api/test-supabase", "/api/force-logout", "/api/health"]; // APIs que não precisam de autenticação
   const authRequiredRoutes = ["/onboarding"]; // Rotas que requerem autenticação mas não redirecionam
   const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
   const isApiRoute = apiRoutes.some((route) => pathname.startsWith(route));
