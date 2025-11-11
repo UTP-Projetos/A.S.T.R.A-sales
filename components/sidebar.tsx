@@ -8,10 +8,6 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
-  Settings,
-  TrendingUp,
-  MessageSquare,
-  Building2,
 } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -19,11 +15,6 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Clientes", href: "/clientes", icon: Users },
   { name: "Agendamentos", href: "/agendamentos", icon: Calendar },
-  { name: "Configurações", href: "/configuracoes", icon: Settings },
-  // REMOVIDO: Links quebrados que não existem
-  // { name: "Funil de Vendas", href: "/funil", icon: TrendingUp },
-  // { name: "Conversas", href: "/conversas", icon: MessageSquare },
-  // { name: "Empresas", href: "/empresas", icon: Building2 },
 ];
 
 export function Sidebar() {

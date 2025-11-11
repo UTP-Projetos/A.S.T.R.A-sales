@@ -3,7 +3,6 @@ import { DashboardStats } from "@/components/dashboard/stats";
 import { RecentClients } from "@/components/dashboard/recent-clients";
 import { SalesChart } from "@/components/dashboard/sales-chart";
 import { LeadFunnelChart } from "@/components/dashboard/lead-funnel-chart";
-import { AmandaStatus } from "@/components/dashboard/amanda-status";
 
 export default function DashboardPage() {
   return (
@@ -23,10 +22,7 @@ export default function DashboardPage() {
           <LeadFunnelChart />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <AmandaStatus />
-          <RecentClients />
-        </div>
+        <RecentClients />
       </div>
     </MainLayout>
   );
