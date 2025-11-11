@@ -7,21 +7,25 @@ import { LeadFunnelChart } from "@/components/dashboard/lead-funnel-chart";
 export default function DashboardPage() {
   return (
     <MainLayout>
-      <div className="space-y-6">
-        <div>
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">
-            Visão geral do A.S.T.R.A CRM
+            Visão geral das suas métricas de vendas
           </p>
         </div>
 
+        {/* Stats Cards */}
         <DashboardStats />
 
-        <div className="grid gap-6 md:grid-cols-2">
+        {/* Charts Grid */}
+        <div className="grid gap-6 lg:grid-cols-2">
           <SalesChart />
           <LeadFunnelChart />
         </div>
 
+        {/* Recent Activity */}
         <RecentClients />
       </div>
     </MainLayout>
