@@ -142,28 +142,28 @@ export function ChatViewer({ clientPhone }: ChatViewerProps) {
                 key={msg.id}
                 className={`flex gap-3 p-4 rounded-lg transition-all ${
                   msg.role === "assistant"
-                    ? "bg-blue-50 border-l-4 border-blue-500"
-                    : "bg-gray-50 border-l-4 border-gray-300"
+                    ? "bg-blue-500/10 dark:bg-blue-500/20 border-l-4 border-blue-500 dark:border-blue-400"
+                    : "bg-muted border-l-4 border-muted-foreground/30 dark:border-muted-foreground/50"
                 }`}
               >
                 <div className="flex-shrink-0 mt-1">
                   {msg.role === "assistant" ? (
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 dark:bg-blue-400">
                       <Bot className="h-5 w-5 text-white" />
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-gray-400">
-                      <User className="h-5 w-5 text-white" />
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted-foreground/50 dark:bg-muted-foreground/70">
+                      <User className="h-5 w-5 text-foreground" />
                     </div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-sm">
+                    <span className="font-semibold text-sm text-foreground">
                       {msg.role === "assistant" ? "A.S.T.R.A" : "Cliente"}
                     </span>
                   </div>
-                  <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+                  <p className="text-sm text-foreground whitespace-pre-wrap break-words leading-relaxed">
                     {msg.content}
                   </p>
                 </div>

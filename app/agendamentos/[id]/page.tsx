@@ -92,7 +92,7 @@ export default function ScheduleDetailsPage() {
     return (
       <MainLayout>
         <div className="flex flex-col items-center justify-center min-h-[400px]">
-          <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+          <AlertCircle className="h-12 w-12 text-red-500 dark:text-red-400 mb-4" />
           <h2 className="text-2xl font-bold mb-2">Erro ao carregar agendamento</h2>
           <p className="text-muted-foreground mb-4">
             {errorSchedule instanceof Error ? errorSchedule.message : "Agendamento não encontrado"}
@@ -329,8 +329,8 @@ export default function ScheduleDetailsPage() {
               {/* Evento: Criação */}
               <div className="flex gap-4">
                 <div className="flex flex-col items-center">
-                  <div className="rounded-full bg-blue-100 p-2">
-                    <Calendar className="h-4 w-4 text-blue-600" />
+                  <div className="rounded-full bg-blue-500/10 dark:bg-blue-500/20 p-2">
+                    <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="w-px h-full bg-border mt-2" />
                 </div>
@@ -352,19 +352,19 @@ export default function ScheduleDetailsPage() {
                 <div className="flex gap-4">
                   <div className="flex flex-col items-center">
                     <div className={`rounded-full p-2 ${
-                      schedule.schedulingStatus === 'Confirmado' ? 'bg-green-100' :
-                      schedule.schedulingStatus === 'Cancelado' ? 'bg-red-100' :
-                      schedule.schedulingStatus === 'Realizado' ? 'bg-blue-100' :
-                      'bg-yellow-100'
+                      schedule.schedulingStatus === 'Confirmado' ? 'bg-green-500/10 dark:bg-green-500/20' :
+                      schedule.schedulingStatus === 'Cancelado' ? 'bg-red-500/10 dark:bg-red-500/20' :
+                      schedule.schedulingStatus === 'Realizado' ? 'bg-blue-500/10 dark:bg-blue-500/20' :
+                      'bg-yellow-500/10 dark:bg-yellow-500/20'
                     }`}>
                       {schedule.schedulingStatus === 'Confirmado' ? (
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                       ) : schedule.schedulingStatus === 'Cancelado' ? (
-                        <X className="h-4 w-4 text-red-600" />
+                        <X className="h-4 w-4 text-red-600 dark:text-red-400" />
                       ) : schedule.schedulingStatus === 'Realizado' ? (
-                        <CheckCircle2 className="h-4 w-4 text-blue-600" />
+                        <CheckCircle2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                       ) : (
-                        <Clock className="h-4 w-4 text-yellow-600" />
+                        <Clock className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                       )}
                     </div>
                   </div>

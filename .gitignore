@@ -55,3 +55,9 @@ logs/
 # OS
 Thumbs.db
 .DS_Store
+
+# Data files (dados sensíveis)
+*.csv
+*_rows.csv
+data/
+seeds/

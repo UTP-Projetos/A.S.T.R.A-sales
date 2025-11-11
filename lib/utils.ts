@@ -10,6 +10,7 @@ export function cn(...inputs: ClassValue[]) {
  * Normaliza telefone para o padrão do n8n/Evolution
  * SEMPRE adiciona DDD 55 e sufixo @s.whatsapp.net
  * Baseado no workflow N8N que espera telefones com DDD
+ * IMPORTANTE: Não duplica DDD 55 se já existir
  */
 export function normalizePhone(phone: string): string {
   if (!phone) return "";
@@ -22,7 +23,13 @@ export function normalizePhone(phone: string): string {
     normalized = normalized.replace("@s.whatsapp.net", "");
   }
   
+  // Remover DDD 55 duplicado se existir (ex: 5555...)
+  if (normalized.startsWith("5555")) {
+    normalized = normalized.substring(2); // Remove os dois primeiros dígitos duplicados
+  }
+  
   // Garante que tenha DDD 55 (baseado no workflow N8N)
+  // Mas não duplica se já existir
   if (!normalized.startsWith("55")) {
     normalized = "55" + normalized;
   }

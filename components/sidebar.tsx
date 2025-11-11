@@ -75,7 +75,7 @@ export function Sidebar() {
             </div>
             <div>
               <p className="text-sm font-medium">Usuário</p>
-              <p className="text-xs text-gray-500">Logado</p>
+              <p className="text-xs text-muted-foreground">Logado</p>
             </div>
           </div>
           <button 

@@ -84,7 +84,7 @@ export default function SchedulesPage() {
                 Carregando...
               </div>
             ) : isError ? (
-              <div className="flex flex-col items-center justify-center py-8 text-red-500">
+              <div className="flex flex-col items-center justify-center py-8 text-red-500 dark:text-red-400">
                 <AlertCircle className="h-8 w-8 mb-2" />
                 <p className="font-semibold">Erro ao carregar agendamentos</p>
                 <p className="text-sm text-muted-foreground mt-1">

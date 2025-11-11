@@ -1,12 +1,19 @@
 {
   "name": "astra-crm",
   "version": "1.0.0",
+  "description": "CRM com Agente de IA A.S.T.R.A para automatização de WhatsApp",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup": "node scripts/setup.js",
+    "check-env": "node -e \"console.log('✅ Variáveis de ambiente validadas'); require('./lib/env.ts')\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

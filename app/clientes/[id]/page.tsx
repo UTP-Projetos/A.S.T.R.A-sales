@@ -34,7 +34,7 @@ import {
 import { type Client, type Schedule } from "@/types/database";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ChatViewer } from "@/components/chat/chat-viewer";
+import { ChatActive } from "@/components/chat/chat-active";
 
 export default function ClientDetailsPage() {
   const params = useParams();
@@ -129,7 +129,7 @@ export default function ClientDetailsPage() {
     return (
       <MainLayout>
         <div className="flex flex-col items-center justify-center min-h-[400px]">
-          <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+          <AlertCircle className="h-12 w-12 text-red-500 dark:text-red-400 mb-4" />
           <h2 className="text-2xl font-bold mb-2">Erro ao carregar cliente</h2>
           <p className="text-muted-foreground mb-4">
             {errorClient instanceof Error ? errorClient.message : "Cliente não encontrado"}
@@ -210,9 +210,9 @@ export default function ClientDetailsPage() {
 
         {/* Mensagem de erro do toggle do bot */}
         {botToggleError && (
-          <Card className="border-red-500 bg-red-50">
+          <Card className="border-red-500 dark:border-red-400 bg-red-500/10 dark:bg-red-500/20">
             <CardContent className="pt-6">
-              <div className="flex items-center gap-2 text-red-700">
+              <div className="flex items-center gap-2 text-red-700 dark:text-red-300">
                 <AlertCircle className="h-4 w-4" />
                 <p className="text-sm font-medium">{botToggleError}</p>
               </div>
@@ -418,8 +418,8 @@ export default function ClientDetailsPage() {
           </CardContent>
         </Card>
 
-        {/* Histórico de Conversa com Amanda */}
-        <ChatViewer clientPhone={client.wppPhone} />
+        {/* Chat Ativo com Cliente */}
+        <ChatActive clientPhone={client.wppPhone} />
       </div>
     </MainLayout>
   );

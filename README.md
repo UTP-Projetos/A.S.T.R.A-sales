@@ -28,22 +28,20 @@ astra-crm/
 └── docs/                 # Documentação
 ```
 
-## 🔧 Configuração
+## 🔧 Setup Rápido
 
-1. **Instalar dependências**:
-   ```bash
-   npm install
-   ```
+```bash
+# 1. Instalar dependências
+npm install
 
-2. **Configurar variáveis de ambiente**:
-   ```bash
-   cp env.example .env.local
-   ```
+# 2. Configurar ambiente
+npm run setup
 
-3. **Executar em desenvolvimento**:
-   ```bash
-   npm run dev
-   ```
+# 3. Rodar o projeto
+npm run dev
+```
+
+📚 **Guia completo:** [SETUP.md](SETUP.md) - Setup em 15-30 minutos
 
 ## 📋 Funcionalidades
 
@@ -66,12 +64,17 @@ astra-crm/
 
 ## 📚 Documentação
 
-- 🔥 **[Correções Críticas](CRITICAL_FIXES_SUMMARY.md)** - Melhorias de segurança e deploy
-- 🚀 **[Guia Rápido](QUICK_START.md)** - Como testar as correções
-- **[Guia de Deploy](docs/DEPLOY.md)** - Instruções para deploy em produção
+### **Documentos Principais**
+- 🗺️ **[ROADMAP MVP](ROADMAP_MVP.md)** - Roadmap completo com 288 funcionalidades (132 implementadas)
+- ✅ **[TESTES EXECUTADOS](TESTES_EXECUTADOS.md)** - Relatório completo de testes
+- 🚧 **[ANÁLISE ONBOARDING](ANALISE_ONBOARDING.md)** - 18 barreiras identificadas para novos devs
+- 🔍 **[ANÁLISE RLS](supabase/ANALISE_PROBLEMAS_RLS.md)** - Problemas de segurança SQL
+
+### **Documentação Técnica**
 - **[API Reference](docs/API.md)** - Documentação completa da API
 - **[Configuração](docs/CONFIG.md)** - Guia de configuração
-- **[Correções Detalhadas](docs/CRITICAL_FIXES.md)** - Guia técnico completo
+- **[Onboarding Dev](docs/ONBOARDING_DEV.md)** - Guia para novos desenvolvedores
+- **[Guia Início Rápido](docs/GUIA_INICIO_RAPIDO.md)** - Setup rápido do projeto
 
 ## 🚀 Deploy
 

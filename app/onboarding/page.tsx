@@ -247,15 +247,15 @@ export default function OnboardingPage() {
                 <h3 className="font-medium mb-2">O que será configurado:</h3>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                     Instância Evolution API
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                     Configurações de segurança
                   </li>
                   <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                     Preparação para conexão WhatsApp
                   </li>
                 </ul>
@@ -332,8 +332,8 @@ export default function OnboardingPage() {
                           onError={(e) => console.log("❌ Erro ao carregar QR Code:", e)}
                         />
                       ) : (
-                        <div className="w-[280px] h-[280px] bg-gray-100 rounded flex items-center justify-center">
-                          <div className="text-center text-gray-500">
+                        <div className="w-[280px] h-[280px] bg-muted rounded flex items-center justify-center">
+                          <div className="text-center text-muted-foreground">
                             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
                             <p>Gerando QR Code...</p>
                           </div>
@@ -362,8 +362,8 @@ export default function OnboardingPage() {
                       </>
                     ) : connectionStatus?.connected ? (
                       <>
-                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        <span className="text-green-600 font-medium">Conectado!</span>
+                        <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <span className="text-green-600 dark:text-green-400 font-medium">Conectado!</span>
                       </>
                     ) : null}
                   </div>
