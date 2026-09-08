@@ -1,4 +1,4 @@
-# 🏢 T.I.N.A CRM
+# 🏢 A.S.T.R.A CRM
 
 Sistema de gestão de clientes e vendas para o setor turístico, desenvolvido com Next.js 15, TypeScript e Supabase.
 
